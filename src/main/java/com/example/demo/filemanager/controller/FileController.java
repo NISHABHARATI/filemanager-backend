@@ -2,6 +2,7 @@ package com.example.demo.filemanager.controller;
 
 import com.example.demo.filemanager.dto.FileDataResponseDTO;
 import com.example.demo.filemanager.entity.FileData;
+import com.example.demo.filemanager.repository.FileRepository;
 import com.example.demo.filemanager.service.FileService;
 import com.example.demo.filemanager.service.FileSharingService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +29,8 @@ public class FileController {
     private FileService fileService;
     @Autowired
     private FileSharingService fileSharingService;
-
+    @Autowired
+    private FileRepository fileRepository;
 
 @GetMapping("/list")
 public List<FileDataResponseDTO> listFilesAndFolders(@RequestParam Long userId, @RequestParam Long parentId) {
@@ -55,38 +57,33 @@ public List<FileDataResponseDTO> listFilesAndFolders(@RequestParam Long userId, 
     }
 
     @GetMapping("/download")
-    public ResponseEntity<Object> downloadFile(@RequestHeader("userId") Long userId,
-                                               @RequestHeader("fileName") String fileName,
-                                               HttpServletRequest request) {
-        try {
+    public ResponseEntity<Object> downloadFile(
+            @RequestHeader("userId") Long userId,
+            @RequestHeader("fileName") String fileName,
+            @RequestHeader(value="parentFolderId", required=false) Long parentFolderId,
+            HttpServletRequest request) {
 
-            if (userId == null) {
-                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-            }
-
-            FileData file = fileService.getFile(userId, fileName);
-
-            if (file == null || file.getBlobData() == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-
-            String contentType = request.getServletContext().getMimeType(file.getFileName());
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
-            ByteArrayResource resource = new ByteArrayResource(file.getBlobData());
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
-                    .contentLength(file.getBlobData().length)
-                    .body(resource);
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        FileData file;
+        if (parentFolderId != null) {
+            file = fileRepository.findByUserIdAndParentFolderIdAndFileName(userId, parentFolderId, fileName);
+        } else {
+            file = fileRepository.findByUserIdAndFileName(userId, fileName);
         }
-    }
 
+        if (file == null || file.getBlobData() == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        ByteArrayResource resource = new ByteArrayResource(file.getBlobData());
+        String contentType = request.getServletContext().getMimeType(file.getFileName());
+        if (contentType == null) contentType = "application/octet-stream";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
+                .contentLength(file.getBlobData().length)
+                .body(resource);
+    }
     private Long getUserId(Long headerUserId, HttpServletRequest request) {
         if (headerUserId != null) {
             System.out.println("User ID from Header: " + headerUserId);
