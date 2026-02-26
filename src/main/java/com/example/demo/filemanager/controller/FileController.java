@@ -21,7 +21,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
-@CrossOrigin(origins = "http://localhost:3000",allowCredentials = "true")
+@CrossOrigin(origins = "https://filemanager-frontend-navy.vercel.app",allowCredentials = "true")
 public class FileController {
 
     @Autowired
