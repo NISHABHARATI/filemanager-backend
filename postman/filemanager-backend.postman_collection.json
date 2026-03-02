@@ -1,0 +1,695 @@
+{
+  "info": {
+    "_postman_id": "9b3d4d94-2b2f-4a84-9e91-44d2505ff4db",
+    "name": "FileManager Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for FileManager backend auth, user and file APIs."
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Nihad\",\n  \"lastName\": \"User\",\n  \"contact\": \"01700000000\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "Create a new user account."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var json = pm.response.json();",
+                  "if (json && json.user && json.user.userId) {",
+                  "  pm.collectionVariables.set(\"userId\", String(json.user.userId));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Logs in user and stores userId from response."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get User Details (Session Cookie)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "details"
+              ]
+            },
+            "description": "Requires session cookie set by /api/auth/login. Use Postman desktop and keep cookie jar enabled."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Emails Excluding Current",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "userId",
+                "value": "{{userId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/emails/exclude-current",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "emails",
+                "exclude-current"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "List Files/Folders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/files/list?userId={{userId}}&parentId={{parentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "files",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "parentId",
+                  "value": "{{parentId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Folder",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/files/create-folder?userId={{userId}}&parentId={{parentId}}&folderName={{folderName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "files",
+                "create-folder"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "parentId",
+                  "value": "{{parentId}}"
+                },
+                {
+                  "key": "folderName",
+                  "value": "{{folderName}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "userId",
+                "value": "{{userId}}"
+              },
+              {
+                "key": "parentFolderId",
+                "value": "{{parentId}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/files/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "files",
+                "upload"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Folder (ZIP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "userId",
+                "value": "{{userId}}"
+              },
+              {
+                "key": "parentFolderId",
+                "value": "{{parentId}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "folderZip",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/files/upload-folder",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "files",
+                "upload-folder"
+              ]
+            },
+            "description": "Upload a .zip that contains a folder tree. Backend recreates folders/files under parentFolderId."
+          },
+          "response": []
+        },
+        {
+          "name": "Download File",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "userId",
+                "value": "{{userId}}"
+              },
+              {
+                "key": "fileName",
+                "value": "{{fileName}}"
+              },
+              {
+                "key": "parentFolderId",
+                "value": "{{parentId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/files/download",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "files",
+                "download"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Rename File/Folder",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "userId",
+                "value": "{{userId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/files/rename?oldFileName={{oldFileName}}&newFileName={{newFileName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "files",
+                "rename"
+              ],
+              "query": [
+                {
+                  "key": "oldFileName",
+                  "value": "{{oldFileName}}"
+                },
+                {
+                  "key": "newFileName",
+                  "value": "{{newFileName}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/files/search?userId={{userId}}&fileName={{searchName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "files",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "fileName",
+                  "value": "{{searchName}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Share File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "userId",
+                "value": "{{userId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/files/share?fileName={{fileName}}&recipientEmail={{recipientEmail}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "files",
+                "share"
+              ],
+              "query": [
+                {
+                  "key": "fileName",
+                  "value": "{{fileName}}"
+                },
+                {
+                  "key": "recipientEmail",
+                  "value": "{{recipientEmail}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Share Links",
+      "item": [
+        {
+          "name": "Create Share Link",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "var json = pm.response.json();",
+                  "if (json && json.id) {",
+                  "  pm.collectionVariables.set(\"shareLinkId\", String(json.id));",
+                  "}",
+                  "if (json && json.token) {",
+                  "  pm.collectionVariables.set(\"shareToken\", String(json.token));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "userId",
+                "value": "{{userId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": {{shareItemId}},\n  \"expiresAt\": \"{{shareExpiresAt}}\",\n  \"password\": \"{{sharePassword}}\",\n  \"maxDownloads\": {{shareMaxDownloads}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/share-links",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "share-links"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List My Share Links",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "userId",
+                "value": "{{userId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/share-links",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "share-links"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Revoke Share Link",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "userId",
+                "value": "{{userId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/share-links/{{shareLinkId}}/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "share-links",
+                "{{shareLinkId}}",
+                "revoke"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Public Open Link",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/public/share/{{shareToken}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "share",
+                "{{shareToken}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Public Verify Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{sharePassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/public/share/{{shareToken}}/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "share",
+                "{{shareToken}}",
+                "verify"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Public Download Shared Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{sharePassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/public/share/{{shareToken}}/download",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "share",
+                "{{shareToken}}",
+                "download"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:10000"
+    },
+    {
+      "key": "email",
+      "value": "nihad@example.com"
+    },
+    {
+      "key": "password",
+      "value": "Password123!"
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "parentId",
+      "value": "-1"
+    },
+    {
+      "key": "folderName",
+      "value": "docs"
+    },
+    {
+      "key": "fileName",
+      "value": "hello.txt"
+    },
+    {
+      "key": "oldFileName",
+      "value": "hello.txt"
+    },
+    {
+      "key": "newFileName",
+      "value": "hello-renamed.txt"
+    },
+    {
+      "key": "searchName",
+      "value": "hello"
+    },
+    {
+      "key": "recipientEmail",
+      "value": "friend@example.com"
+    },
+    {
+      "key": "shareItemId",
+      "value": "1"
+    },
+    {
+      "key": "shareExpiresAt",
+      "value": "2026-12-31T23:59:59"
+    },
+    {
+      "key": "sharePassword",
+      "value": "Share123!"
+    },
+    {
+      "key": "shareMaxDownloads",
+      "value": "5"
+    },
+    {
+      "key": "shareLinkId",
+      "value": ""
+    },
+    {
+      "key": "shareToken",
+      "value": ""
+    }
+  ]
+}

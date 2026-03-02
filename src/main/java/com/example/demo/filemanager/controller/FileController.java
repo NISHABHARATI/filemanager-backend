@@ -56,6 +56,29 @@ public List<FileDataResponseDTO> listFilesAndFolders(@RequestParam Long userId, 
         }
     }
 
+    @PostMapping("/upload-folder")
+    public ResponseEntity<Map<String, Object>> uploadFolder(@RequestParam("folderZip") MultipartFile folderZip,
+                                                             @RequestHeader(value = "parentFolderId", required = true) Long parentFolderId,
+                                                             @RequestHeader(value = "userId", required = true) Long headerUserId,
+                                                             HttpServletRequest request) {
+        try {
+            Long userId = getUserId(headerUserId, request);
+            if (userId == null) {
+                return new ResponseEntity<>(Map.of("message", "User not logged in"), HttpStatus.UNAUTHORIZED);
+            }
+
+            int importedFiles = fileService.uploadFolderZip(userId, folderZip, parentFolderId);
+            return new ResponseEntity<>(
+                    Map.of("message", "Folder uploaded successfully", "importedFiles", importedFiles),
+                    HttpStatus.CREATED
+            );
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(Map.of("message", e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(Map.of("message", "Failed to upload folder"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/download")
     public ResponseEntity<Object> downloadFile(
             @RequestHeader("userId") Long userId,
@@ -170,5 +193,4 @@ public ResponseEntity<List<FileData>> searchFiles(@RequestParam Long userId, @Re
 
 
 }
-
 
